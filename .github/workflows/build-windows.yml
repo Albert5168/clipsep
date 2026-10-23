@@ -48,8 +48,11 @@ jobs:
         with:
           name: ClipSep-Setup
           path: dist/ClipSep-Setup-*.zip
-      - name: Attach to release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('v0.1.{0}', github.run_number) }}
+          name: 剪報圖片文字分離編輯器 ${{ github.ref_type == 'tag' && github.ref_name || format('v0.1.{0}', github.run_number) }}
+          body: 下載下方的 ClipSep-Setup zip，解壓縮後執行 ClipSep-Setup.exe 安裝。
+          make_latest: true
           files: dist/ClipSep-Setup-*.zip
