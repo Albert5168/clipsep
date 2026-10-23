@@ -6,6 +6,9 @@ on:
     tags: ["v*"]
   workflow_dispatch:
 
+env:
+  PYTHONUTF8: "1"  # Windows console defaults to cp1252 and can't print Chinese
+
 jobs:
   build:
     runs-on: windows-latest
