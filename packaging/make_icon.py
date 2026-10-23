@@ -3,6 +3,7 @@ import os
 from PIL import Image, ImageDraw
 
 root = os.path.join(os.path.dirname(__file__), "..", "assets")
+os.makedirs(root, exist_ok=True)
 logo = os.path.join(root, "logo.png")
 if os.path.exists(logo):
     im = Image.open(logo).convert("RGBA")
