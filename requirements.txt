@@ -1,0 +1,8 @@
+rapidocr==3.10.0
+onnxruntime==1.29.0
+opencv-python-headless
+numpy
+python-pptx
+PySide6-Essentials
+opencc-python-reimplemented
+pymupdf

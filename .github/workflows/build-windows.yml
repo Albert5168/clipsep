@@ -1,0 +1,46 @@
+name: Build Windows installer
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller pillow
+      - name: Make app icon from logo
+        run: python packaging/make_icon.py
+      - name: Smoke test (OCR on a sample image)
+        run: python packaging/smoke_test.py
+      - name: Build app folder
+        working-directory: packaging
+        run: pyinstaller --noconfirm --distpath ../dist --workpath ../build clipsep.spec
+      - name: Install Inno Setup Chinese language file
+        shell: pwsh
+        run: |
+          $dst = "${env:ProgramFiles(x86)}\Inno Setup 6\Languages\ChineseTraditional.isl"
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/ChineseTraditional.isl" -OutFile $dst
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $env:APP_VERSION = if ($env:GITHUB_REF_TYPE -eq "tag") { $env:GITHUB_REF_NAME.TrimStart("v") } else { "0.1.${env:GITHUB_RUN_NUMBER}" }
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" packaging\installer.iss
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ClipSep-Setup
+          path: dist/ClipSep-Setup-*.exe
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ClipSep-Setup-*.exe
